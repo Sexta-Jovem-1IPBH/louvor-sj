@@ -18,7 +18,7 @@ jobs:
           sudo apt-get install -y postgresql-client-17
 
       - name: Gerar dump do banco
-        run: pg_dump "${{ secrets.SUPABASE_DB_URL }}" --no-owner --no-privileges -f backup.sql
+        run: /usr/lib/postgresql/17/bin/pg_dump "${{ secrets.SUPABASE_DB_URL }}" --no-owner --no-privileges -f backup.sql
 
       - name: Publicar como artefato
         uses: actions/upload-artifact@v4

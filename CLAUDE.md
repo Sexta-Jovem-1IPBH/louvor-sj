@@ -10,7 +10,7 @@ O dono do projeto é o Arthur (estudante de engenharia de produção, nível té
 - **Banco + login:** **Supabase** (plano Free, região São Paulo). Postgres + Supabase Auth com provedor Google.
 - **Arquivos:** **Google Drive** da conta pessoal do Arthur (PowerPoints, áudios, vídeos, documentos). O Supabase guarda só dados e IDs/links do Drive.
 - **Automação:** **GitHub Actions** (despertador anti-pausa e backup semanal).
-- Integração Google: projeto no Google Cloud com Drive API e Docs API ativadas; o servidor age em nome da conta do Arthur (OAuth com refresh token guardado em variável de ambiente, nunca no código).
+- Integração Google: projeto Google Cloud dedicado (`louvorsj`, dono é a conta `louvorsj.1pipbh@gmail.com` criada só para o projeto). Drive API e Docs API ativadas. Autenticação via **conta de serviço** (`louvorsj@louvorsj.iam.gserviceaccount.com`), chave guardada em variável de ambiente, nunca no código. Decisão (mudou do plano original de OAuth com refresh token): evita a expiração de token de 7 dias que apps OAuth em modo "Teste" têm com escopos restritos do Drive, e não exige verificação do Google. Efeito prático: as pastas/documentos do Drive precisam ser **compartilhados manualmente** (como Editor) com o e-mail da conta de serviço para o app enxergá-los.
 
 ## Regras de negócio (não negociáveis)
 
@@ -90,8 +90,10 @@ RLS: leitura pública; escrita para usuários autenticados; sem DELETE em `music
 
 - [x] Contas GitHub, Vercel e Supabase (projeto em São Paulo)
 - [x] Node.js, npm e Git instalados; projeto Next.js (TypeScript + Tailwind + App Router) criado em `Louvor SJ/`
-- [ ] Projeto no Google Cloud: ativar Drive API e Docs API, tela de consentimento OAuth, credenciais, obter refresh token da conta do Arthur
-- [ ] Provedor Google no Supabase Auth
+- [x] Identidade dedicada do projeto: conta Google `louvorsj.1pipbh@gmail.com`; repositório movido para a Organização GitHub **Sexta-Jovem-1IPBH**; convite enviado na Org do Supabase
+- [x] Projeto no Google Cloud (`louvorsj`): Drive API e Docs API ativadas, conta de serviço criada (`louvorsj@louvorsj.iam.gserviceaccount.com`) e chave testada (ver "Integração Google" acima — mudou de OAuth para conta de serviço)
+- [ ] Compartilhar as pastas/documentos do Drive listados acima com `louvorsj@louvorsj.iam.gserviceaccount.com` (acesso de Editor) — sem isso a conta de serviço não enxerga nada
+- [ ] Provedor Google no Supabase Auth (login dos usuários do app, diferente da conta de serviço do Drive)
 - [ ] Variáveis de ambiente na Vercel e secrets no GitHub
 - [ ] Conferir se a cópia da pasta Slides está completa
 

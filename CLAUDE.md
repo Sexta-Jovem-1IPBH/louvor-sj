@@ -92,7 +92,7 @@ RLS: leitura pública; escrita para usuários autenticados; sem DELETE em `music
 - [x] Node.js, npm e Git instalados; projeto Next.js (TypeScript + Tailwind + App Router) criado em `Louvor SJ/`
 - [x] Identidade dedicada do projeto: conta Google `louvorsj.1pipbh@gmail.com`; repositório movido para a Organização GitHub **Sexta-Jovem-1IPBH**; convite enviado na Org do Supabase
 - [x] Projeto no Google Cloud (`louvorsj`): Drive API e Docs API ativadas, conta de serviço criada (`louvorsj@louvorsj.iam.gserviceaccount.com`) e chave testada (ver "Integração Google" acima — mudou de OAuth para conta de serviço)
-- [ ] Compartilhar as pastas/documentos do Drive listados acima com `louvorsj@louvorsj.iam.gserviceaccount.com` (acesso de Editor) — sem isso a conta de serviço não enxerga nada
+- [x] Compartilhar as pastas/documentos do Drive listados acima com `louvorsj@louvorsj.iam.gserviceaccount.com` (acesso de Editor) — testado e confirmado (as 6 pastas/documentos aparecem para a conta de serviço)
 - [ ] Provedor Google no Supabase Auth (login dos usuários do app, diferente da conta de serviço do Drive)
 - [ ] Variáveis de ambiente na Vercel e secrets no GitHub
 - [ ] Conferir se a cópia da pasta Slides está completa

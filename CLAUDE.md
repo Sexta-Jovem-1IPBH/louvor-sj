@@ -12,11 +12,24 @@ O dono do projeto é o Arthur (estudante de engenharia de produção, nível té
 - **Automação:** **GitHub Actions** (despertador anti-pausa e backup semanal).
 - Integração Google: projeto Google Cloud dedicado (`louvorsj`, dono é a conta `louvorsj.1pipbh@gmail.com` criada só para o projeto). Drive API e Docs API ativadas. Autenticação via **conta de serviço** (`louvorsj@louvorsj.iam.gserviceaccount.com`), chave guardada em variável de ambiente, nunca no código. Decisão (mudou do plano original de OAuth com refresh token): evita a expiração de token de 7 dias que apps OAuth em modo "Teste" têm com escopos restritos do Drive, e não exige verificação do Google. Efeito prático: as pastas/documentos do Drive precisam ser **compartilhados manualmente** (como Editor) com o e-mail da conta de serviço para o app enxergá-los.
 
-> **Limitação descoberta em 2026-10-01 (importante para a fase 2):** contas de serviço **não têm cota de armazenamento no Drive**. A mensagem do Google é literal: *"Service Accounts do not have storage quota. Leverage shared drives, or use OAuth delegation instead."* Isso significa que a conta de serviço:
-> - **consegue:** ler qualquer arquivo compartilhado com ela, e **editar o conteúdo** de arquivos que já existem (reescrever o Repertório SJ e o documento de cifras funciona);
-> - **não consegue:** criar nenhum arquivo ou pasta novos, nem dentro das pastas do Arthur.
->
-> Isso bloqueia, do jeito atual: gerar os .pptx de slides (regra 4), criar subpastas por música e receber uploads de áudio/vídeo (fase 3). Saídas possíveis, a decidir antes da fase 2: (a) OAuth com a conta do Arthur usando escopo `drive.file` (não é escopo restrito, logo pode publicar em produção sem verificação do Google, e o token não expira — a criação de arquivos passaria a ser feita por ele, com a conta de serviço seguindo responsável pela leitura); (b) Google Workspace com Shared Drive (pago); (c) abrir mão da criação automática.
+### O que a conta de serviço pode e não pode (verificado em 2026-10-01)
+
+| Operação | Pode? | Observação |
+|---|---|---|
+| Ler arquivos compartilhados com ela | ✅ | toda a importação saiu daqui |
+| Editar o **conteúdo** de documento existente | ✅ | testado no Repertório SJ via Docs API `batchUpdate` |
+| Renomear arquivos | ✅ | 174 arquivos renomeados |
+| **Criar** arquivo ou pasta | ❌ | *"Service Accounts do not have storage quota"* — contas de serviço fora do Workspace não têm cota, então falha mesmo dentro de pasta compartilhada |
+| Apagar / mover para lixeira | ❌ | `canDelete: false`, `canTrash: false` (não é dona dos arquivos) |
+
+Consequência: reescrever o Repertório SJ e o documento de cifras **funciona** com a conta de serviço. Gerar slides novos e subir mídia **não**.
+
+**Decisão (2026-10-01) para a criação de arquivos:** usar o **token do Google da pessoa logada no app**, não um segundo serviço. O login com Google já existe (Supabase Auth); basta pedir o escopo `drive.file` junto e usar o `provider_token` da sessão para criar o arquivo em nome de quem está usando. Vantagens: sem custo, sem token de servidor que expira, sem verificação do Google (`drive.file` não é escopo restrito), e o arquivo nasce pertencendo a uma pessoa de verdade, consumindo a cota dela. Combina com a regra de que a mídia sobe direto do navegador.
+
+A implementar junto com a fase 2, nesta ordem:
+1. adicionar `drive.file` aos escopos na tela de consentimento do Google Cloud e no `signInWithOAuth` do app;
+2. **verificar primeiro:** se o escopo `drive.file` consegue criar arquivo dentro de uma pasta pré-existente passando o ID dela. Se não conseguir, o caminho conhecido é o **Google Picker**, em que a pessoa escolhe a pasta uma vez e o app ganha acesso a ela;
+3. quem for gerar slides precisa ter acesso de edição à pasta Slides — ou seja, a automação da regra 4 só roda para quem o Arthur autorizou no Drive, e para os demais o app registra a música e marca a pendência "sem slides".
 
 ## Regras de negócio (não negociáveis)
 

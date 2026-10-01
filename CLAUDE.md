@@ -37,20 +37,20 @@ O dono do projeto é o Arthur (estudante de engenharia de produção, nível té
 | Item | ID | Observação |
 |---|---|---|
 | Pasta raiz "Cifras e Vídeos - SJ" | `1g5Wrc0HMUGtJyFL90mIV4e2ljWtxHn3u` | |
-| **Repertório SJ** (Google Docs) — lista mestre | `1BNvY-rXJDV6SiUMssoAV84cWjhYjxjNnJVCS9-_kzws` | ~145 títulos, um por parágrafo. Fonte da verdade na importação; depois é reescrito pelo app |
-| **Pasta Slides nova** (do Arthur) — destino oficial | `1ae2pC573LtGy06cqkdBiEAdKzET6nG1Y` | Fonte única (decisão do Arthur: não comparar com a pasta antiga). Prefixo "Cópia de " removido dos 50 arquivos em 2026-10-01 |
-| Pasta Slides antiga (do Lucas) | `1HFSEoAXzFyaCkWClCrEt7rKW0RCm9_4L` | Só leitura; não usada pelo app (acesso da conta de serviço nem foi configurado) |
+| **Repertório SJ** (Google Docs) — lista mestre | `1BNvY-rXJDV6SiUMssoAV84cWjhYjxjNnJVCS9-_kzws` | 138 títulos, um por parágrafo. Fonte da verdade na importação; depois é reescrito pelo app |
+| **Pasta Slides nova** (do Arthur) — destino oficial | `1ae2pC573LtGy06cqkdBiEAdKzET6nG1Y` | Fonte única. Em 2026-10-01 o Arthur copiou o resto da pasta antiga (224 arquivos); prefixo "Cópia de " removido de todos, redundantes marcados `ZZ DUPLICADO` e não-músicas marcadas `ZZ REVISAR` (ver `scripts/import/09`) |
+| Pasta Slides antiga (do Lucas) | `1HFSEoAXzFyaCkWClCrEt7rKW0RCm9_4L` | Só leitura; já copiada para a pasta nova, não é mais usada |
 | Pasta Cifras | `1ZPYd502E4kQRlC_CPCfDQQH-tNaFhu_O` | |
-| "(Todas as cifras).docx" | `14Jm9z-iaVBPdcUPt5gtJlW6kBxOc--kt` | Cifras resumidas. Converter para Google Docs para facilitar a reescrita automática; regerar o PDF ao lado a cada atualização |
+| "(Todas as cifras).docx" | `14Jm9z-iaVBPdcUPt5gtJlW6kBxOc--kt` | Cifras resumidas, lido direto como .docx (`scripts/import/02`). Para a reescrita automática vai precisar virar Google Docs — e isso **não pode ser feito pela conta de serviço** (ver limitação acima) |
 | "(Todas as cifras).pdf" | `1A_QTKuUxEAGQgsQaXhfpp1xHtjbHf7WG` | |
 | Pasta "Áudios e Divisões de vozes" | `1u0rX_mODCcso9EjkiB0K8ECWbHtZ6GbS` | Uma subpasta por música — manter esse padrão para novos áudios |
 | Pasta Vídeos | `1MSCODB400NWO_bpOROtT5A7zIf06DTaN` | Criar subpasta por música para novos vídeos |
 
 ### Formatos observados
 
-- **Documento de cifras:** título da música numa linha, seguido de linhas de acordes (ex.: `A F#m D E`), sem rótulos de seção. Muitas músicas têm só o título (sem cifra ainda). Sustenidos aparecem escapados (`F\#m`) na exportação — normalizar.
-- **Slides:** 1 slide de título (nome em maiúsculas) + slides com blocos de até 4 linhas de letra. Usar um PowerPoint existente (ex.: "Louvores e honras") como referência de estilo/modelo.
-- **Discrepâncias conhecidas:** "És maia Forte" (repertório) = "És mais Forte" (slides); "Senhor, guia meu caminhar" = "Guia meu caminhar.ppt" (formato antigo, converter); "Mocidade presbiteriana (Hino)" = "Hino da Mocidade - Hino 382". Há slides fora do repertório (ex.: Falar com Deus, Proclamai, Incomparável, Das trevas à luz, Digno é o Senhor) → tela de revisão, com padrão "adicionar ao repertório".
+- **Documento de cifras:** título da música numa linha, seguido de linhas de acordes separadas por linha em branco, sem rótulos de seção. 132 músicas, das quais 61 só têm o título (sem cifra ainda). A quantidade de linhas em branco entre as partes é irregular e **não** indica fim de música — o que separa uma música da outra é a linha de título. Notação brasileira em uso: `7M`, `A4`, `º`, `°`, `ø`, `(x2)` (o dicionário de acordes está em `scripts/import/03`).
+- **Slides:** 1 slide de título (nome em maiúsculas) + slides com blocos de até 4 linhas de letra. As quebras de linha dentro do slide são tags `<a:br/>`, não parágrafos — quem ignora isso gruda as linhas da letra. Usar um PowerPoint existente (ex.: "Louvores e honras") como referência de estilo/modelo; há também um "0. Modelo slide 1.pptx" na pasta.
+- **Discrepâncias conhecidas:** "És maia Forte" (repertório) = "És mais Forte" (slides); "Senhor, guia meu caminhar" = "Guia meu caminhar.ppt" (formato antigo; não dá para ler nem converter pela conta de serviço); "Mocidade presbiteriana (Hino)" = "Hino da Mocidade - Hino 382". Há slides fora do repertório → tela de revisão, com padrão "adicionar ao repertório".
 
 ## Funcionalidades
 
@@ -88,7 +88,20 @@ RLS: leitura pública; escrita para usuários autenticados; sem DELETE em `music
 
 ## Fases
 
-1. **Importação e consulta:** schema do Supabase; importar Repertório SJ + documento de cifras + letras extraídas dos PowerPoints; tela de revisão de casamento de nomes; tela do repertório; página da música com transposição; reescrita automática do Repertório SJ.
+1. **Importação e consulta:** schema do Supabase ✅; importar Repertório SJ + documento de cifras + letras extraídas dos PowerPoints ✅ (176 músicas e 985 seções no banco em 2026-10-01, via `scripts/import/`); tela do repertório ✅; página da música ✅. Falta: transposição de tom, e a reescrita automática do Repertório SJ.
+
+### Como a importação foi feita (2026-10-01)
+
+Scripts numerados em `scripts/import/`, rodados em ordem (`node --env-file=.env.local scripts/import/<arquivo>`). As saídas `out-*.json` ficam fora do Git.
+
+Resultado: 176 músicas = 138 do Repertório SJ + 38 que só existiam como slide (o CLAUDE.md já definia "adicionar ao repertório" como padrão para esse caso). Dessas, 155 com letra, 71 com acordes, 155 com slide vinculado; 21 músicas do repertório seguem sem slide.
+
+Decisões do casamento de nomes (`scripts/import/10`), úteis se for preciso reimportar:
+- casa primeiro por apelido conhecido, depois por nome de arquivo exato, depois pelo título dentro do slide, e só então por semelhança (Levenshtein + sobreposição de palavras);
+- semelhança abaixo de 0.86 é **recusada** e a música vira nova — pegou os falsos positivos "Confissões"≈"Missões" e "Salmo 139"≈"Salmo 34";
+- `SJ.pptx` é conteúdo repetido de "O meu louvor é fruto", não entra como música.
+
+As seções entram como "Parte 1, Parte 2…" pareadas por índice, porque letra (dos slides) e acordes (do documento de cifras) são fontes independentes com quantidades diferentes de blocos. A rotulagem correta (Intro, Refrão…) fica para a interface, depois.
 2. **Adicionar música completo:** gerador de slides (.pptx no padrão atual, salvo no Drive), parser de cifra, geração da resumida, verificação de divergências, atualização do documento de cifras, botão do Cifra Club.
 3. **Mídias e histórico:** upload direto para o Drive, gravação de áudio, aba Mídias com filtros, registro de cultos.
 

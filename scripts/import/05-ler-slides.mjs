@@ -3,6 +3,8 @@ import { writeFileSync } from "node:fs";
 import JSZip from "jszip";
 
 const PASTA_SLIDES = "1ae2pC573LtGy06cqkdBiEAdKzET6nG1Y";
+const MIME_GOOGLE_SLIDES = "application/vnd.google-apps.presentation";
+const MIME_PPTX = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
 
 const drive = getDriveClient();
 
@@ -45,29 +47,52 @@ async function lerPptx(buffer) {
   return slides;
 }
 
-const lista = await drive.files.list({
-  q: `'${PASTA_SLIDES}' in parents and trashed = false`,
-  fields: "files(id, name)",
-  pageSize: 1000,
-});
+const arquivos = [];
+let pageToken;
+do {
+  const res = await drive.files.list({
+    q: `'${PASTA_SLIDES}' in parents and trashed = false`,
+    fields: "nextPageToken, files(id, name, mimeType)",
+    pageSize: 1000,
+    pageToken,
+  });
+  arquivos.push(...(res.data.files ?? []));
+  pageToken = res.data.nextPageToken ?? undefined;
+} while (pageToken);
 
-const arquivos = lista.data.files ?? [];
 console.log(`Total de arquivos na pasta: ${arquivos.length}`);
 
 const resultado = [];
+const ignorados = [];
 for (const arquivo of arquivos) {
-  if (!/\.pptx$/i.test(arquivo.name)) {
-    console.log(`Ignorando (não é .pptx): ${arquivo.name}`);
+  if (/^ZZ /.test(arquivo.name)) {
+    ignorados.push(`${arquivo.name} (marcado como duplicado/revisar)`);
     continue;
   }
   try {
-    const res = await drive.files.get({ fileId: arquivo.id, alt: "media" }, { responseType: "arraybuffer" });
-    const slides = await lerPptx(Buffer.from(res.data));
-    resultado.push({ arquivo: arquivo.name, slides });
-    console.log(`OK: ${arquivo.name} (${slides.length} slides)`);
+    let buffer;
+    if (arquivo.mimeType === MIME_GOOGLE_SLIDES) {
+      const res = await drive.files.export({ fileId: arquivo.id, mimeType: MIME_PPTX }, { responseType: "arraybuffer" });
+      buffer = Buffer.from(res.data);
+    } else if (arquivo.mimeType === MIME_PPTX) {
+      const res = await drive.files.get({ fileId: arquivo.id, alt: "media" }, { responseType: "arraybuffer" });
+      buffer = Buffer.from(res.data);
+    } else {
+      ignorados.push(`${arquivo.name} (formato não suportado: ${arquivo.mimeType})`);
+      continue;
+    }
+    const slides = await lerPptx(buffer);
+    resultado.push({ arquivo: arquivo.name, driveId: arquivo.id, slides });
+    process.stdout.write(".");
   } catch (err) {
-    console.log(`ERRO: ${arquivo.name} -> ${err.message}`);
+    ignorados.push(`${arquivo.name} (erro: ${err.message})`);
   }
+}
+
+console.log("\n");
+if (ignorados.length) {
+  console.log(`Ignorados (${ignorados.length}):`);
+  ignorados.forEach((i) => console.log(`  - ${i}`));
 }
 
 writeFileSync(new URL("./out-slides.json", import.meta.url), JSON.stringify(resultado, null, 2), "utf8");

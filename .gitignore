@@ -42,3 +42,6 @@ next-env.d.ts
 
 .vercel
 .env*
+
+# saídas intermediárias da importação (dados do Drive, não versionar)
+scripts/import/out-*.json

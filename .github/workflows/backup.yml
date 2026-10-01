@@ -1,0 +1,23 @@
+name: Backup semanal do banco
+
+on:
+  schedule:
+    - cron: "0 6 * * 0"
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Instalar cliente do Postgres
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Gerar dump do banco
+        run: pg_dump "${{ secrets.SUPABASE_DB_URL }}" --no-owner --no-privileges -f backup.sql
+
+      - name: Publicar como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: backup-${{ github.run_id }}
+          path: backup.sql
+          retention-days: 90

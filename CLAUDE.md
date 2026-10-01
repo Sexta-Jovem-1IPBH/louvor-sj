@@ -32,8 +32,8 @@ O dono do projeto é o Arthur (estudante de engenharia de produção, nível té
 |---|---|---|
 | Pasta raiz "Cifras e Vídeos - SJ" | `1g5Wrc0HMUGtJyFL90mIV4e2ljWtxHn3u` | |
 | **Repertório SJ** (Google Docs) — lista mestre | `1BNvY-rXJDV6SiUMssoAV84cWjhYjxjNnJVCS9-_kzws` | ~145 títulos, um por parágrafo. Fonte da verdade na importação; depois é reescrito pelo app |
-| **Pasta Slides nova** (do Arthur) — destino oficial | `1ae2pC573LtGy06cqkdBiEAdKzET6nG1Y` | Arquivos com prefixo "Cópia de " (ignorar ao casar nomes). A cópia pode estar incompleta: conferir contra a pasta antiga |
-| Pasta Slides antiga (do Lucas) | `1HFSEoAXzFyaCkWClCrEt7rKW0RCm9_4L` | Só leitura |
+| **Pasta Slides nova** (do Arthur) — destino oficial | `1ae2pC573LtGy06cqkdBiEAdKzET6nG1Y` | Fonte única (decisão do Arthur: não comparar com a pasta antiga). Prefixo "Cópia de " removido dos 50 arquivos em 2026-10-01 |
+| Pasta Slides antiga (do Lucas) | `1HFSEoAXzFyaCkWClCrEt7rKW0RCm9_4L` | Só leitura; não usada pelo app (acesso da conta de serviço nem foi configurado) |
 | Pasta Cifras | `1ZPYd502E4kQRlC_CPCfDQQH-tNaFhu_O` | |
 | "(Todas as cifras).docx" | `14Jm9z-iaVBPdcUPt5gtJlW6kBxOc--kt` | Cifras resumidas. Converter para Google Docs para facilitar a reescrita automática; regerar o PDF ao lado a cada atualização |
 | "(Todas as cifras).pdf" | `1A_QTKuUxEAGQgsQaXhfpp1xHtjbHf7WG` | |
@@ -95,7 +95,7 @@ RLS: leitura pública; escrita para usuários autenticados; sem DELETE em `music
 - [x] Compartilhar as pastas/documentos do Drive listados acima com `louvorsj@louvorsj.iam.gserviceaccount.com` (acesso de Editor) — testado e confirmado (as 6 pastas/documentos aparecem para a conta de serviço)
 - [ ] Provedor Google no Supabase Auth (login dos usuários do app, diferente da conta de serviço do Drive)
 - [ ] Variáveis de ambiente na Vercel e secrets no GitHub
-- [ ] Conferir se a cópia da pasta Slides está completa
+- [x] Conferir se a cópia da pasta Slides está completa (decisão: usar só a pasta nova como fonte, sem comparar com a antiga; prefixo "Cópia de " removido dos 50 arquivos)
 
 ## Decisões ainda abertas
 

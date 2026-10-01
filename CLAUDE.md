@@ -12,6 +12,12 @@ O dono do projeto é o Arthur (estudante de engenharia de produção, nível té
 - **Automação:** **GitHub Actions** (despertador anti-pausa e backup semanal).
 - Integração Google: projeto Google Cloud dedicado (`louvorsj`, dono é a conta `louvorsj.1pipbh@gmail.com` criada só para o projeto). Drive API e Docs API ativadas. Autenticação via **conta de serviço** (`louvorsj@louvorsj.iam.gserviceaccount.com`), chave guardada em variável de ambiente, nunca no código. Decisão (mudou do plano original de OAuth com refresh token): evita a expiração de token de 7 dias que apps OAuth em modo "Teste" têm com escopos restritos do Drive, e não exige verificação do Google. Efeito prático: as pastas/documentos do Drive precisam ser **compartilhados manualmente** (como Editor) com o e-mail da conta de serviço para o app enxergá-los.
 
+> **Limitação descoberta em 2026-10-01 (importante para a fase 2):** contas de serviço **não têm cota de armazenamento no Drive**. A mensagem do Google é literal: *"Service Accounts do not have storage quota. Leverage shared drives, or use OAuth delegation instead."* Isso significa que a conta de serviço:
+> - **consegue:** ler qualquer arquivo compartilhado com ela, e **editar o conteúdo** de arquivos que já existem (reescrever o Repertório SJ e o documento de cifras funciona);
+> - **não consegue:** criar nenhum arquivo ou pasta novos, nem dentro das pastas do Arthur.
+>
+> Isso bloqueia, do jeito atual: gerar os .pptx de slides (regra 4), criar subpastas por música e receber uploads de áudio/vídeo (fase 3). Saídas possíveis, a decidir antes da fase 2: (a) OAuth com a conta do Arthur usando escopo `drive.file` (não é escopo restrito, logo pode publicar em produção sem verificação do Google, e o token não expira — a criação de arquivos passaria a ser feita por ele, com a conta de serviço seguindo responsável pela leitura); (b) Google Workspace com Shared Drive (pago); (c) abrir mão da criação automática.
+
 ## Regras de negócio (não negociáveis)
 
 1. **O repertório só cresce.** Não existe exclusão de música, nem na interface nem nas políticas do banco (RLS sem DELETE em `musicas` e `secoes`). Correções são permitidas.

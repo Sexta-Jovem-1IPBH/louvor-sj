@@ -1,6 +1,7 @@
 import PptxGenJS from "pptxgenjs";
 import { FUNDO_SLIDE_BASE64 } from "./fundo.ts";
 import { secoesUnicas } from "../cifras/parser.ts";
+import { formatarParaSlide } from "./formatarLetra.ts";
 
 /**
  * Gera o .pptx de uma música no mesmo padrão dos slides que a equipe já usa:
@@ -37,7 +38,7 @@ const TEXTO_BASE = {
  */
 export function letraDasSecoes(secoes: { letra: string | null; acordes: string | null }[]): string {
   return secoesUnicas(secoes)
-    .map((s) => s.letra)
+    .map((s) => (s.letra ? formatarParaSlide(s.letra) : ""))
     .filter(Boolean)
     .join("\n\n");
 }

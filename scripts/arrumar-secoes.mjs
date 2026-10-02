@@ -5,7 +5,8 @@
 //       node --env-file=.env.local scripts/arrumar-secoes.mjs --todas   [--aplicar]
 
 import { createClient } from "@supabase/supabase-js";
-import { rotularSecoes, limparEspacos } from "../src/lib/cifras/parser.ts";
+import { rotularSecoes } from "../src/lib/cifras/parser.ts";
+import { formatarParaSlide } from "../src/lib/slides/formatarLetra.ts";
 
 const argumentos = process.argv.slice(2);
 const APLICAR = argumentos.includes("--aplicar");
@@ -39,7 +40,7 @@ for (const musica of musicas) {
     secoes.map((s) => ({
       tipo: s.tipo,
       acordes: s.acordes ?? "",
-      letra: (s.letra ?? "").split("\n").map(limparEspacos).filter(Boolean).join("\n"),
+      letra: s.letra ? formatarParaSlide(s.letra) : "",
       letraCifrada: s.letra_cifrada ?? "",
     })),
   );

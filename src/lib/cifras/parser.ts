@@ -4,6 +4,7 @@ import {
   ehLinhaDeAcordes,
   ROTULO_SECAO,
 } from "./acordes.ts";
+import { formatarParaSlide } from "../slides/formatarLetra.ts";
 
 export interface SecaoParseada {
   tipo: string;
@@ -62,7 +63,9 @@ export function parsearCifra(texto: string): SecaoParseada[] {
       secoes.push({
         tipo: atual.tipo ?? `Parte ${secoes.length + 1}`,
         acordes: atual.acordes.join(" "),
-        letra: atual.letra.join("\n"),
+        // as quebras da cifra colada seguem os acordes, não as frases cantadas:
+        // formatarParaSlide refaz as linhas no padrão da equipe
+        letra: atual.letra.length ? formatarParaSlide(atual.letra.join("\n")) : "",
         letraCifrada: atual.cifrada.join("\n"),
       });
     }

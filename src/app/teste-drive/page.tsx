@@ -12,13 +12,23 @@ const PASTA_SLIDES = "1ae2pC573LtGy06cqkdBiEAdKzET6nG1Y";
 
 export default function TesteDrive() {
   const [token, setToken] = useState<string | null>(null);
+  const [estado, setEstado] = useState("verificando sessão…");
   const [linhas, setLinhas] = useState<string[]>([]);
   const [rodando, setRodando] = useState(false);
 
   useEffect(() => {
     createClient()
       .auth.getSession()
-      .then(({ data }) => setToken(data.session?.provider_token ?? null));
+      .then(({ data }) => {
+        const sessao = data.session;
+        setToken(sessao?.provider_token ?? null);
+        if (!sessao) setEstado("Não há sessão: é preciso entrar com o Google.");
+        else if (!sessao.provider_token)
+          setEstado(
+            `Logado como ${sessao.user.email}, mas sem token do Google na sessão (ele só vem logo após o login). Entre de novo por este botão.`,
+          );
+        else setEstado(`Logado como ${sessao.user.email}, com token do Google em mãos.`);
+      });
   }, []);
 
   function log(texto: string) {
@@ -89,11 +99,12 @@ export default function TesteDrive() {
         Google. O arquivo criado é apagado em seguida.
       </p>
 
+      <p className="rounded-lg bg-zinc-100 px-3 py-2 text-sm text-zinc-600 dark:bg-zinc-900 dark:text-zinc-300">
+        {estado}
+      </p>
+
       {!token ? (
         <div className="flex flex-col items-start gap-2">
-          <p className="text-sm text-zinc-500">
-            Preciso de um login recente para ter o token do Google em mãos.
-          </p>
           <button
             onClick={entrar}
             className="rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900"

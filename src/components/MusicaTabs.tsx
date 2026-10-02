@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import type { Musica, Secao, Midia } from "@/lib/types";
-import { transporLinha, transporChordPro, transporTom } from "@/lib/cifras/transpor";
+import { transporLinha, transporTom } from "@/lib/cifras/transpor";
+import { secoesUnicas } from "@/lib/cifras/parser";
+import { CifraAmpla } from "@/components/CifraAmpla";
 
 type Aba = "letra" | "slides" | "resumida" | "ampla" | "midias";
 
@@ -64,6 +66,8 @@ export function MusicaTabs({
 
   const cifraClubUrl = `https://www.cifraclub.com.br/?q=${encodeURIComponent(musica.titulo)}`;
   const tomTransposto = transporTom(musica.tom_original, semitons);
+  // nas cifras o refrão repetido só atrapalha; na letra e nos slides a ordem é mantida
+  const secoesCifra = secoesUnicas(secoes);
 
   return (
     <div className="flex flex-col gap-4">
@@ -122,10 +126,10 @@ export function MusicaTabs({
             setSemitons={setSemitons}
             tom={tomTransposto}
           />
-          {secoes.every((s) => !s.acordes?.trim()) && (
+          {secoesCifra.every((s) => !s.acordes?.trim()) && (
             <p className="text-zinc-400">Cifra resumida ainda não cadastrada.</p>
           )}
-          {secoes
+          {secoesCifra
             .filter((s) => s.acordes?.trim())
             .map((secao) => (
               <div key={secao.id}>
@@ -155,19 +159,17 @@ export function MusicaTabs({
             setSemitons={setSemitons}
             tom={tomTransposto}
           />
-          {secoes.every((s) => !s.letra_cifrada?.trim()) && (
+          {secoesCifra.every((s) => !s.letra_cifrada?.trim()) && (
             <p className="text-zinc-400">Cifra ampla ainda não cadastrada.</p>
           )}
-          {secoes
+          {secoesCifra
             .filter((s) => s.letra_cifrada?.trim())
             .map((secao) => (
               <div key={secao.id}>
                 <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-zinc-400">
                   {secao.tipo}
                 </p>
-                <pre className="whitespace-pre-wrap font-mono text-sm text-zinc-900 dark:text-zinc-100">
-                  {transporChordPro(secao.letra_cifrada!, semitons)}
-                </pre>
+                <CifraAmpla texto={secao.letra_cifrada!} semitons={semitons} />
               </div>
             ))}
         </div>

@@ -20,13 +20,21 @@ export default async function MusicaPage({
       <Link href="/" className="w-fit text-sm text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300">
         ← Repertório
       </Link>
-      <div>
-        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-          {musica.titulo}
-        </h1>
-        {musica.tom_original && (
-          <p className="text-sm text-zinc-400">Tom original: {musica.tom_original}</p>
-        )}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
+            {musica.titulo}
+          </h1>
+          {musica.tom_original && (
+            <p className="text-sm text-zinc-400">Tom original: {musica.tom_original}</p>
+          )}
+        </div>
+        <Link
+          href={`/musicas/${id}/editar`}
+          className="shrink-0 rounded-full bg-zinc-100 px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+        >
+          Editar
+        </Link>
       </div>
       <MusicaTabs musica={musica} secoes={secoes} midias={midias} />
     </main>

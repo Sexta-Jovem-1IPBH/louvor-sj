@@ -15,6 +15,11 @@ export interface SecaoParseada {
   letraCifrada: string;
 }
 
+/** Espaços múltiplos viram um só. Na cifra colada eles existem só para alinhar com os acordes. */
+export function limparEspacos(texto: string): string {
+  return texto.replace(/\s+/g, " ").trim();
+}
+
 /**
  * Insere os acordes na letra na posição de coluna em que estavam escritos acima dela.
  * Ex.:  "   D        A"  +  "Meu Jesus, Salvador"  ->  "Meu[D] Jesus, [A]Salvador"
@@ -95,17 +100,96 @@ export function parsearCifra(texto: string): SecaoParseada[] {
       atual!.acordes.push(...acordesDaLinha(linha));
 
       if (temLetraAbaixo) {
-        atual!.letra.push(proxima.trim());
+        // a letra vem com espaços extras para alinhar com os acordes acima;
+        // no texto limpo eles viram espaço simples, senão aparecem nos slides
+        atual!.letra.push(limparEspacos(proxima));
         atual!.cifrada.push(alinharAcordes(linha, proxima));
         i++; // a linha de letra já foi consumida
       }
     } else {
       // letra sem acordes acima
-      atual!.letra.push(linha.trim());
-      atual!.cifrada.push(linha.trim());
+      atual!.letra.push(limparEspacos(linha));
+      atual!.cifrada.push(limparEspacos(linha));
     }
   }
 
   fechar();
-  return secoes;
+  return rotularSecoes(secoes);
+}
+
+/** Chave de comparação: duas seções são "a mesma" quando a letra (ou os acordes) coincidem. */
+function chaveDaSecao(s: SecaoParseada): string {
+  const base = s.letra || s.acordes;
+  return base
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+const ROTULO_GENERICO = /^Parte \d+$/;
+
+/**
+ * Troca "Parte 1, Parte 2…" por nomes que fazem sentido para quem toca.
+ * O refrão é descoberto pela repetição: o bloco com letra que mais se repete.
+ * Rótulos que a pessoa escreveu na cifra colada são respeitados.
+ */
+export function rotularSecoes(secoes: SecaoParseada[]): SecaoParseada[] {
+  if (secoes.length === 0) return secoes;
+
+  const ocorrencias = new Map<string, number>();
+  for (const s of secoes) {
+    const chave = chaveDaSecao(s);
+    ocorrencias.set(chave, (ocorrencias.get(chave) ?? 0) + 1);
+  }
+
+  // candidato a refrão: bloco COM letra que mais aparece (e aparece mais de uma vez)
+  let chaveRefrao: string | null = null;
+  let maior = 1;
+  for (const s of secoes) {
+    if (!s.letra) continue;
+    const chave = chaveDaSecao(s);
+    const vezes = ocorrencias.get(chave)!;
+    if (vezes > maior) {
+      maior = vezes;
+      chaveRefrao = chave;
+    }
+  }
+
+  let estrofe = 0;
+  const numeroDaEstrofe = new Map<string, number>();
+
+  return secoes.map((s, i) => {
+    if (!ROTULO_GENERICO.test(s.tipo)) return s; // rótulo veio da cifra colada
+
+    const chave = chaveDaSecao(s);
+
+    if (!s.letra) {
+      const tipo = i === 0 ? "Intro" : i === secoes.length - 1 ? "Final" : "Ponte";
+      return { ...s, tipo };
+    }
+
+    if (chave === chaveRefrao) return { ...s, tipo: "Refrão" };
+
+    if (!numeroDaEstrofe.has(chave)) numeroDaEstrofe.set(chave, ++estrofe);
+    return { ...s, tipo: `Estrofe ${numeroDaEstrofe.get(chave)}` };
+  });
+}
+
+/**
+ * Seções sem repetição, para as abas de cifra: o refrão aparece uma vez só.
+ * Compara pelo conteúdo e ignora o rótulo — senão músicas importadas antes da
+ * rotulagem automática ("Parte 1", "Parte 2"…) continuariam repetindo tudo.
+ */
+export function secoesUnicas<T extends { acordes: string | null; letra: string | null }>(
+  secoes: T[],
+): T[] {
+  const vistas = new Set<string>();
+  return secoes.filter((s) => {
+    const chave = `${s.letra ?? ""}|${s.acordes ?? ""}`.replace(/\s+/g, " ").trim().toLowerCase();
+    if (vistas.has(chave)) return false;
+    vistas.add(chave);
+    return true;
+  });
 }

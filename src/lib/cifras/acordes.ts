@@ -7,7 +7,9 @@
 
 const QUALIDADE = "(?:maj7|maj|dim7|dim|aug|sus2|sus4|sus|add9|add11|add13|add2|add4|m7|m9|m|º|°|ø)?";
 const EXTENSAO = "(?:7M|9M|11M|13M|2|4|5|6|7|9|11|13)?";
-const NOTA = `[A-G](?:#|b)?${QUALIDADE}${EXTENSAO}`;
+/** Alterações entre parênteses, como em "D7(4/9)" e "A7(b9)" — comuns nas cifras brasileiras. */
+const ALTERACAO = "(?:\\([#b\\d/+-]+\\))?";
+const NOTA = `[A-G](?:#|b)?${QUALIDADE}${EXTENSAO}${ALTERACAO}`;
 
 export const ACORDE = new RegExp(`^${NOTA}(?:\\/${NOTA})?$`);
 
@@ -25,6 +27,8 @@ const PALAVRAS_SECAO =
 export const ROTULO_SECAO = new RegExp(`^\\s*(${PALAVRAS_SECAO}\\s*\\d*)\\s*:?\\s*(.*)$`, "i");
 
 export function limparToken(token: string): string {
+  // acorde com alteração entre parênteses ("D7(4/9)") já é válido inteiro — não descascar
+  if (ACORDE.test(token)) return token;
   return token.replace(/^[(\[,]+/, "").replace(/[)\],]+$/, "");
 }
 

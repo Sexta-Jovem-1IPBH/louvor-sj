@@ -42,13 +42,15 @@ export async function enviarArquivo({
   mimeType: string;
   pastaId: string;
 }): Promise<string> {
-  const metadados = new Blob([JSON.stringify({ name: nome, parents: [pastaId] })], {
+  // o mimeType precisa ir nos metadados E no tipo do blob: sem isso o Drive trata
+  // o .pptx como arquivo zip comum (que é o que ele é por baixo) e não abre como slide
+  const metadados = new Blob([JSON.stringify({ name: nome, parents: [pastaId], mimeType })], {
     type: "application/json",
   });
 
   const corpo = new FormData();
   corpo.append("metadata", metadados);
-  corpo.append("file", conteudo);
+  corpo.append("file", new Blob([conteudo], { type: mimeType }));
 
   const resposta = await fetch(
     "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id",

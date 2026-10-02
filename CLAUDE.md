@@ -18,6 +18,7 @@ O dono do projeto é o Arthur (estudante de engenharia de produção, nível té
 |---|---|---|
 | Ler arquivos compartilhados com ela | ✅ | toda a importação saiu daqui |
 | Editar o **conteúdo** de documento existente | ✅ | testado no Repertório SJ via Docs API `batchUpdate` |
+| **Substituir o conteúdo** de arquivo binário existente | ✅ | `files.update` com `media` — é assim que a regra 5 refaz slides gerados (`scripts/regerar-slides.mjs`). Não cria arquivo, então não esbarra na cota |
 | Renomear arquivos | ✅ | 174 arquivos renomeados |
 | **Criar** arquivo ou pasta | ❌ | *"Service Accounts do not have storage quota"* — contas de serviço fora do Workspace não têm cota, então falha mesmo dentro de pasta compartilhada |
 | Apagar / mover para lixeira | ❌ | `canDelete: false`, `canTrash: false` (não é dona dos arquivos) |

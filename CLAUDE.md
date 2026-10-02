@@ -26,10 +26,15 @@ Consequência: reescrever o Repertório SJ e o documento de cifras **funciona** 
 
 **Decisão (2026-10-01) para a criação de arquivos:** usar o **token do Google da pessoa logada no app**, não um segundo serviço. O login com Google já existe (Supabase Auth); basta pedir o escopo `drive.file` junto e usar o `provider_token` da sessão para criar o arquivo em nome de quem está usando. Vantagens: sem custo, sem token de servidor que expira, sem verificação do Google (`drive.file` não é escopo restrito), e o arquivo nasce pertencendo a uma pessoa de verdade, consumindo a cota dela. Combina com a regra de que a mídia sobe direto do navegador.
 
-A implementar junto com a fase 2, nesta ordem:
-1. adicionar `drive.file` aos escopos na tela de consentimento do Google Cloud e no `signInWithOAuth` do app;
-2. **verificar primeiro:** se o escopo `drive.file` consegue criar arquivo dentro de uma pasta pré-existente passando o ID dela. Se não conseguir, o caminho conhecido é o **Google Picker**, em que a pessoa escolhe a pasta uma vez e o app ganha acesso a ela;
-3. quem for gerar slides precisa ter acesso de edição à pasta Slides — ou seja, a automação da regra 4 só roda para quem o Arthur autorizou no Drive, e para os demais o app registra a música e marca a pendência "sem slides".
+Estado: o escopo já está pedido no login (`src/lib/supabase/escopos.ts`) e **testado em produção em 2026-10-02**. O resultado respondeu a dúvida que estava em aberto:
+
+> **`drive.file` cria arquivo dentro de uma pasta que já existe passando só o ID dela.** Não precisa de Google Picker. Confirmado criando um arquivo na pasta Slides e lendo o `parents` de volta.
+
+O que ainda vale lembrar: quem for gerar slides precisa ter acesso de edição à pasta no Drive. Para quem não tiver, o app deve cadastrar a música normalmente e marcar a pendência "sem slides", em vez de falhar.
+
+**Login (feito):** `signInWithOAuth` com `access_type: offline` e `prompt: consent`, callback em `src/app/auth/callback/route.ts`. Duas pegadinhas que já custaram tempo:
+- o endereço de retorno precisa estar em **Redirect URLs** no painel do Supabase (`https://louvor-sj-ashy.vercel.app/**`), senão o Supabase ignora o destino e manda para a página inicial;
+- a tela de consentimento está em modo "Teste", então só e-mails cadastrados em **Usuários de teste** conseguem entrar, e os tokens do Google expiram a cada 7 dias. Incomoda pouco porque o token é usado na hora, com a pessoa logada — não é token de servidor. Para acabar com isso seria preciso publicar o app ("Em produção"), o que pede domínio autorizado e política de privacidade.
 
 ## Regras de negócio (não negociáveis)
 

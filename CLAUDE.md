@@ -120,7 +120,7 @@ As seções entram como "Parte 1, Parte 2…" pareadas por índice, porque letra
 
 Transpõe a cifra resumida (linhas de acordes) e a ampla (ChordPro `[A]letra`) com o mesmo controle, preservando espaçamento, parênteses, marcadores como `(x2)` e símbolos `º`/`°`/`ø`. Mantém o estilo do acorde original: quem escreveu bemol continua lendo bemol.
 
-**Simplificação conhecida:** sem o tom da música, a saída usa sustenidos por padrão — subir meio tom de A dá `A#`, e não `Bb`, que seria a leitura convencional. Enarmonicamente correto, mas um músico nota a diferença. Dá para melhorar quando `tom_original` começar a ser preenchido.
+**Decisão do Arthur (2026-10-02): a transposição usa sustenidos.** Subir meio tom de A dá `A#`, e não `Bb`. Enarmonicamente correto e é como os sites de cifra brasileiros costumam escrever. Não precisa "melhorar" isso depois.
 2. **Adicionar música completo:** gerador de slides (.pptx no padrão atual, salvo no Drive), parser de cifra, geração da resumida, verificação de divergências, atualização do documento de cifras, botão do Cifra Club.
 3. **Mídias e histórico:** upload direto para o Drive, gravação de áudio, aba Mídias com filtros, registro de cultos.
 

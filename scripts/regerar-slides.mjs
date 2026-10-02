@@ -7,7 +7,7 @@
 import { Readable } from "node:stream";
 import { createClient } from "@supabase/supabase-js";
 import { getDriveClient } from "../src/lib/google/client.ts";
-import { montarApresentacao } from "../src/lib/slides/gerar.ts";
+import { letraDasSecoes, montarApresentacao } from "../src/lib/slides/gerar.ts";
 
 const MIME_PPTX = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
 
@@ -29,14 +29,11 @@ if (musica.slides_origem === "manual") {
 
 const { data: secoes } = await supabase
   .from("secoes")
-  .select("letra")
+  .select("letra, acordes")
   .eq("musica_id", musica.id)
   .order("ordem");
 
-const letra = secoes
-  .map((s) => s.letra)
-  .filter(Boolean)
-  .join("\n\n");
+const letra = letraDasSecoes(secoes);
 
 const pptx = montarApresentacao(musica.titulo, letra);
 const buffer = await pptx.write({ outputType: "nodebuffer" });

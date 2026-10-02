@@ -7,7 +7,7 @@ import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import { ESCOPO_DRIVE } from "@/lib/supabase/escopos";
 import { parsearCifra, type SecaoParseada } from "@/lib/cifras/parser";
-import { dividirEmBlocos, gerarSlides } from "@/lib/slides/gerar";
+import { dividirEmBlocos, gerarSlides, letraDasSecoes } from "@/lib/slides/gerar";
 import { enviarArquivo, PASTA_SLIDES, ErroDrive } from "@/lib/google/driveNavegador";
 import { normalizarTitulo, similaridade } from "@/lib/texto";
 
@@ -57,11 +57,7 @@ export default function AdicionarMusica() {
   }, [cifra, letra]);
 
   const letraFinal = useMemo(
-    () =>
-      secoes
-        .map((s) => s.letra)
-        .filter(Boolean)
-        .join("\n\n"),
+    () => letraDasSecoes(secoes.map((s) => ({ letra: s.letra || null, acordes: s.acordes || null }))),
     [secoes],
   );
 

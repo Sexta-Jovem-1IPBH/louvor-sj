@@ -66,7 +66,8 @@ export function MusicaTabs({
 
   const cifraClubUrl = `https://www.cifraclub.com.br/?q=${encodeURIComponent(musica.titulo)}`;
   const tomTransposto = transporTom(musica.tom_original, semitons);
-  // nas cifras o refrão repetido só atrapalha; na letra e nos slides a ordem é mantida
+  // decisão do Arthur: cada parte aparece uma vez só, aqui e nos slides.
+  // O banco segue guardando a sequência como foi colada.
   const secoesCifra = secoesUnicas(secoes);
 
   return (
@@ -90,8 +91,8 @@ export function MusicaTabs({
 
       {aba === "letra" && (
         <div className="flex flex-col gap-6">
-          {secoes.length === 0 && <p className="text-zinc-400">Letra ainda não cadastrada.</p>}
-          {secoes.map((secao) => (
+          {secoesCifra.length === 0 && <p className="text-zinc-400">Letra ainda não cadastrada.</p>}
+          {secoesCifra.map((secao) => (
             <div key={secao.id}>
               <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-zinc-400">
                 {secao.tipo}

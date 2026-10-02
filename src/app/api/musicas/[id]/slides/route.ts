@@ -2,7 +2,7 @@ import { Readable } from "node:stream";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getDriveClient } from "@/lib/google/client";
-import { montarApresentacao } from "@/lib/slides/gerar";
+import { letraDasSecoes, montarApresentacao } from "@/lib/slides/gerar";
 
 const MIME_PPTX = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
 
@@ -39,14 +39,11 @@ export async function POST(_requisicao: Request, { params }: { params: Promise<{
 
   const { data: secoes } = await supabase
     .from("secoes")
-    .select("letra")
+    .select("letra, acordes")
     .eq("musica_id", id)
     .order("ordem");
 
-  const letra = (secoes ?? [])
-    .map((s) => s.letra)
-    .filter(Boolean)
-    .join("\n\n");
+  const letra = letraDasSecoes(secoes ?? []);
 
   if (!letra.trim()) {
     return NextResponse.json({ erro: "a música está sem letra" }, { status: 400 });

@@ -1,5 +1,6 @@
 import PptxGenJS from "pptxgenjs";
 import { FUNDO_SLIDE_BASE64 } from "./fundo.ts";
+import { secoesUnicas } from "../cifras/parser.ts";
 
 /**
  * Gera o .pptx de uma música no mesmo padrão dos slides que a equipe já usa:
@@ -28,6 +29,18 @@ const TEXTO_BASE = {
   w: LAYOUT.width - 1,
   h: LAYOUT.height - 0.6,
 } as const;
+
+/**
+ * Junta a letra das seções para virar slides, com cada parte aparecendo uma vez só
+ * (decisão do Arthur em 2026-10-02: o refrão repetido não é reescrito; quem projeta
+ * volta no slide dele). O banco continua guardando a sequência como foi colada.
+ */
+export function letraDasSecoes(secoes: { letra: string | null; acordes: string | null }[]): string {
+  return secoesUnicas(secoes)
+    .map((s) => s.letra)
+    .filter(Boolean)
+    .join("\n\n");
+}
 
 /**
  * Cada estrofe (separada por linha em branco) vira um slide, como nos arquivos

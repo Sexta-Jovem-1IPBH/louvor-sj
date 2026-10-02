@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Musica, Secao, Midia } from "@/lib/types";
+import { transporLinha, transporChordPro, transporTom } from "@/lib/cifras/transpor";
 
 type Aba = "letra" | "slides" | "resumida" | "ampla" | "midias";
 
@@ -13,6 +14,42 @@ const ABAS: { id: Aba; label: string }[] = [
   { id: "midias", label: "Mídias" },
 ];
 
+function ControleTranspor({
+  semitons,
+  setSemitons,
+  tom,
+}: {
+  semitons: number;
+  setSemitons: (n: number) => void;
+  tom: string | null;
+}) {
+  const botao =
+    "flex h-9 w-9 items-center justify-center rounded-full bg-zinc-100 text-lg font-medium text-zinc-700 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700";
+
+  return (
+    <div className="flex items-center gap-3 border-b border-zinc-200 pb-3 dark:border-zinc-800">
+      <span className="text-sm text-zinc-500">Tom</span>
+      <button onClick={() => setSemitons(semitons - 1)} className={botao} aria-label="Abaixar meio tom">
+        −
+      </button>
+      <span className="min-w-14 text-center text-sm font-medium text-zinc-900 dark:text-zinc-100">
+        {tom ?? (semitons === 0 ? "original" : `${semitons > 0 ? "+" : ""}${semitons}`)}
+      </span>
+      <button onClick={() => setSemitons(semitons + 1)} className={botao} aria-label="Subir meio tom">
+        +
+      </button>
+      {semitons !== 0 && (
+        <button
+          onClick={() => setSemitons(0)}
+          className="text-sm text-zinc-500 underline hover:text-zinc-800 dark:hover:text-zinc-200"
+        >
+          voltar ao original
+        </button>
+      )}
+    </div>
+  );
+}
+
 export function MusicaTabs({
   musica,
   secoes,
@@ -23,8 +60,10 @@ export function MusicaTabs({
   midias: Midia[];
 }) {
   const [aba, setAba] = useState<Aba>("letra");
+  const [semitons, setSemitons] = useState(0);
 
   const cifraClubUrl = `https://www.cifraclub.com.br/?q=${encodeURIComponent(musica.titulo)}`;
+  const tomTransposto = transporTom(musica.tom_original, semitons);
 
   return (
     <div className="flex flex-col gap-4">
@@ -78,6 +117,11 @@ export function MusicaTabs({
 
       {aba === "resumida" && (
         <div className="flex flex-col gap-4">
+          <ControleTranspor
+            semitons={semitons}
+            setSemitons={setSemitons}
+            tom={tomTransposto}
+          />
           {secoes.every((s) => !s.acordes?.trim()) && (
             <p className="text-zinc-400">Cifra resumida ainda não cadastrada.</p>
           )}
@@ -89,7 +133,7 @@ export function MusicaTabs({
                   {secao.tipo}
                 </p>
                 <pre className="whitespace-pre-wrap font-mono text-sm text-zinc-900 dark:text-zinc-100">
-                  {secao.acordes}
+                  {transporLinha(secao.acordes!, semitons)}
                 </pre>
               </div>
             ))}
@@ -106,6 +150,11 @@ export function MusicaTabs({
 
       {aba === "ampla" && (
         <div className="flex flex-col gap-4">
+          <ControleTranspor
+            semitons={semitons}
+            setSemitons={setSemitons}
+            tom={tomTransposto}
+          />
           {secoes.every((s) => !s.letra_cifrada?.trim()) && (
             <p className="text-zinc-400">Cifra ampla ainda não cadastrada.</p>
           )}
@@ -117,7 +166,7 @@ export function MusicaTabs({
                   {secao.tipo}
                 </p>
                 <pre className="whitespace-pre-wrap font-mono text-sm text-zinc-900 dark:text-zinc-100">
-                  {secao.letra_cifrada}
+                  {transporChordPro(secao.letra_cifrada!, semitons)}
                 </pre>
               </div>
             ))}

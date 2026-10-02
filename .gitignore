@@ -45,3 +45,4 @@ next-env.d.ts
 
 # saídas intermediárias da importação (dados do Drive, não versionar)
 scripts/import/out-*.json
+scripts/backup-repertorio-sj.txt

@@ -101,7 +101,7 @@ RLS: leitura pública; escrita para usuários autenticados; sem DELETE em `music
 
 ## Fases
 
-1. **Importação e consulta:** schema do Supabase ✅; importar Repertório SJ + documento de cifras + letras extraídas dos PowerPoints ✅ (176 músicas e 985 seções no banco em 2026-10-01, via `scripts/import/`); tela do repertório ✅; página da música ✅. Falta: transposição de tom, e a reescrita automática do Repertório SJ.
+1. **Importação e consulta — concluída.** Schema do Supabase; importação das três fontes do Drive (176 músicas e 985 seções, em 2026-10-01, via `scripts/import/`); tela do repertório com busca, filtros e selos; página da música com abas; transposição de tom; reescrita do documento Repertório SJ (`src/lib/google/repertorio.ts`, rodada em 2026-10-02 — o documento foi de 138 para 176 títulos).
 
 ### Como a importação foi feita (2026-10-01)
 
@@ -115,6 +115,12 @@ Decisões do casamento de nomes (`scripts/import/10`), úteis se for preciso rei
 - `SJ.pptx` é conteúdo repetido de "O meu louvor é fruto", não entra como música.
 
 As seções entram como "Parte 1, Parte 2…" pareadas por índice, porque letra (dos slides) e acordes (do documento de cifras) são fontes independentes com quantidades diferentes de blocos. A rotulagem correta (Intro, Refrão…) fica para a interface, depois.
+
+### Transposição (`src/lib/cifras/transpor.ts`)
+
+Transpõe a cifra resumida (linhas de acordes) e a ampla (ChordPro `[A]letra`) com o mesmo controle, preservando espaçamento, parênteses, marcadores como `(x2)` e símbolos `º`/`°`/`ø`. Mantém o estilo do acorde original: quem escreveu bemol continua lendo bemol.
+
+**Simplificação conhecida:** sem o tom da música, a saída usa sustenidos por padrão — subir meio tom de A dá `A#`, e não `Bb`, que seria a leitura convencional. Enarmonicamente correto, mas um músico nota a diferença. Dá para melhorar quando `tom_original` começar a ser preenchido.
 2. **Adicionar música completo:** gerador de slides (.pptx no padrão atual, salvo no Drive), parser de cifra, geração da resumida, verificação de divergências, atualização do documento de cifras, botão do Cifra Club.
 3. **Mídias e histórico:** upload direto para o Drive, gravação de áudio, aba Mídias com filtros, registro de cultos.
 
